@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟 快乐识字 - 四岁宝宝学汉字</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", "Heiti SC", sans-serif;
+            background: linear-gradient(135deg, #FFE5B4 0%, #FFB6C1 50%, #87CEEB 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #FF6B6B;
+            text-shadow: 2px 2px 0 #FFE66D;
+        }
+
+        .stars {
+            font-size: 24px;
+            margin-top: 10px;
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .category-tab {
+            padding: 15px 25px;
+            font-size: 18px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .category-tab.active {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .category-tab:nth-child(1) { background: #FF6B6B; color: white; }
+        .category-tab:nth-child(2) { background: #4ECDC4; color: white; }
+        .category-tab:nth-child(3) { background: #FFE66D; color: #333; }
+        .category-tab:nth-child(4) { background: #95E1D3; color: #333; }
+        .category-tab:nth-child(5) { background: #DDA0DD; color: white; }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 4px solid transparent;
+        }
+
+        .card:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .card.learned {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, #fff 0%, #f0fff0 100%);
+        }
+
+        .card-char {
+            font-size: 72px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+
+        .card-pinyin {
+            font-size: 20px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .card-word {
+            font-size: 16px;
+            color: #888;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            animation: popIn 0.3s;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-char {
+            font-size: 120px;
+            font-weight: bold;
+            color: #FF6B6B;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0 #FFE66D;
+        }
+
+        .modal-pinyin {
+            font-size: 36px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .modal-words {
+            font-size: 24px;
+            color: #4ECDC4;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .modal-close {
+            padding: 15px 40px;
+            font-size: 20px;
+            border: none;
+            border-radius: 25px;
+            background: #FF6B6B;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .modal-learned {
+            background: #4CAF50;
+        }
+
+        .congrats {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px 50px;
+            border-radius: 25px;
+            font-size: 32px;
+            color: #FF6B6B;
+            font-weight: bold;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            z-index: 1001;
+            animation: bounce 0.5s;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        .progress-bar {
+            background: white;
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .progress-text {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .progress-track {
+            background: #eee;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #FF6B6B, #FFE66D, #4CAF50);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s;
+            width: 0%;
+        }
+
+        @media (max-width: 480px) {
+            .header h1 { font-size: 24px; }
+            .card-char { font-size: 56px; }
+            .category-tab { padding: 10px 18px; font-size: 16px; }
+            .cards-container { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 快乐识字 🌟</h1>
+            <div class="stars">⭐ <span id="star-count">0</span> ⭐</div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-text">📊 学习进度：<span id="learned-count">0</span> / <span id="total-count">0</span></div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="category-tabs" id="category-tabs"></div>
+
+        <div class="cards-container" id="cards-container"></div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-char" id="modal-char"></div>
+            <div class="modal-pinyin" id="modal-pinyin"></div>
+            <div class="modal-words" id="modal-words"></div>
+            <button class="modal-close" onclick="closeModal()">🔊 读一遍</button>
+            <button class="modal-close modal-learned" onclick="markAsLearned()">✅ 我学会了</button>
+        </div>
+    </div>
+
+    <div class="congrats" id="congrats">🎉 太棒了！🎉</div>
+
+    <script>
+        // 汉字数据
+        const categories = {
+            "数字": [
+                { char: "一", pinyin: "yī", words: "一个、一天、第一" },
+                { char: "二", pinyin: "èr", words: "两个、二月、第二天" },
+                { char: "三", pinyin: "sān", words: "三个、三天、三月" },
+                { char: "四", pinyin: "sì", words: "四个、四月、四季" },
+                { char: "五", pinyin: "wǔ", words: "五个、五月、五天" },
+                { char: "六", pinyin: "liù", words: "六个、六月、六天" },
+                { char: "七", pinyin: "qī", words: "七个、七月、七天" },
+                { char: "八", pinyin: "bā", words: "八个、八月、八方" },
+                { char: "九", pinyin: "jiǔ", words: "九个、九月、九天" },
+                { char: "十", pinyin: "shí", words: "十个、十月、十足" }
+            ],
+            "颜色": [
+                { char: "红", pinyin: "hóng", words: "红色、红旗、红花" },
+                { char: "黄", pinyin: "huáng", words: "黄色、黄河、黄金" },
+                { char: "蓝", pinyin: "lán", words: "蓝色、蓝天、蓝天白云" },
+                { char: "绿", pinyin: "lǜ", words: "绿色、绿叶、绿树" },
+                { char: "白", pinyin: "bái", words: "白色、白云、白天" },
+                { char: "黑", pinyin: "hēi", words: "黑色、黑夜、黑板" },
+                { char: "紫", pinyin: "zǐ", words: "紫色、紫花、紫色" },
+                { char: "橙", pinyin: "chéng", words: "橙色、橙子、橙色" }
+            ],
+            "动物": [
+                { char: "人", pinyin: "rén", words: "大人、小人、人们" },
+                { char: "大", pinyin: "dà", words: "大人、大象、大小" },
+                { char: "小", pinyin: "xiǎo", words: "小人、小鸟、小小" },
+                { char: "口", pinyin: "kǒu", words: "人口、户口、口水" },
+                { char: "手", pinyin: "shǒu", words: "大手、小手、手机" },
+                { char: "目", pinyin: "mù", words: "目光、耳目、目的" },
+                { char: "耳", pinyin: "ěr", words: "耳朵、耳目、左耳" },
+                { char: "日", pinyin: "rì", words: "日子、日出、日月" },
+                { char: "月", pinyin: "yuè", words: "月亮、日月、正月" },
+                { char: "水", pinyin: "shuǐ", words: "喝水、雨水、水果" },
+                { char: "火", pinyin: "huǒ", words: "大火、火山、着火" },
+                { char: "山", pinyin: "shān", words: "大山、火山、山水" }
+            ],
+            "自然": [
+                { char: "天", pinyin: "tiān", words: "天空、白天、春天" },
+                { char: "地", pinyin: "dì", words: "土地、天地、大地" },
+                { char: "云", pinyin: "yún", words: "白云、乌云、云朵" },
+                { char: "雨", pinyin: "yǔ", words: "下雨、雨水、大雨" },
+                { char: "风", pinyin: "fēng", words: "大风、台风、春风" },
+                { char: "雪", pinyin: "xuě", words: "下雪、雪人、雪花" },
+                { char: "花", pinyin: "huā", words: "花朵、红花、开花" },
+                { char: "草", pinyin: "cǎo", words: "小草、草地、青草" },
+                { char: "树", pinyin: "shù", words: "大树、树叶、树木" }
+            ],
+            "家庭": [
+                { char: "父", pinyin: "fù", words: "父亲、父母、父子" },
+                { char: "母", pinyin: "mǔ", words: "母亲、父母、母子" },
+                { char: "儿", pinyin: "ér", words: "儿子、女儿、小儿" },
+                { char: "女", pinyin: "nǚ", words: "女儿、女生、女孩" },
+                { char: "爸", pinyin: "bà", words: "爸爸、老爸、爸妈" },
+                { char: "妈", pinyin: "mā", words: "妈妈、老妈、爸妈" },
+                { char: "哥", pinyin: "gē", words: "哥哥、大哥、表哥" },
+                { char: "姐", pinyin: "jiě", words: "姐姐、大姐、表姐" },
+                { char: "弟", pinyin: "dì", words: "弟弟、兄弟、弟子" },
+                { char: "妹", pinyin: "mèi", words: "妹妹、姐妹、兄妹" }
+            ]
+        };
+
+        let currentCategory = "数字";
+        let currentChar = null;
+        let learnedChars = JSON.parse(localStorage.getItem('learnedChars') || '[]');
+        let stars = parseInt(localStorage.getItem('stars') || '0');
+
+        // 初始化
+        function init() {
+            renderCategoryTabs();
+            renderCards();
+            updateProgress();
+            updateStars();
+        }
+
+        // 渲染分类标签
+        function renderCategoryTabs() {
+            const container = document.getElementById('category-tabs');
+            container.innerHTML = '';
+
+            Object.keys(categories).forEach(category => {
+                const tab = document.createElement('button');
+                tab.className = 'category-tab' + (category === currentCategory ? ' active' : '');
+                tab.textContent = category;
+                tab.onclick = () => selectCategory(category);
+                container.appendChild(tab);
+            });
+        }
+
+        // 选择分类
+        function selectCategory(category) {
+            currentCategory = category;
+            renderCategoryTabs();
+            renderCards();
+        }
+
+        // 渲染卡片
+        function renderCards() {
+            const container = document.getElementById('cards-container');
+            container.innerHTML = '';
+
+            const chars = categories[currentCategory];
+
+            chars.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                if (learnedChars.includes(item.char)) {
+                    card.classList.add('learned');
+                }
+
+                card.innerHTML = `
+                    <div class="card-char">${item.char}</div>
+                    <div class="card-pinyin">${item.pinyin}</div>
+                    <div class="card-word">${item.words.split('、')[0]}</div>
+                `;
+
+                card.onclick = () => showChar(item);
+                container.appendChild(card);
+            });
+        }
+
+        // 显示汉字详情
+        function showChar(item) {
+            currentChar = item;
+            document.getElementById('modal-char').textContent = item.char;
+            document.getElementById('modal-pinyin').textContent = item.pinyin;
+            document.getElementById('modal-words').textContent = '📝 ' + item.words;
+            document.getElementById('modal').classList.add('show');
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+            if (currentChar) {
+                speak(currentChar.char + '，' + currentChar.pinyin);
+            }
+        }
+
+        // 标记为已学会
+        function markAsLearned() {
+            if (currentChar && !learnedChars.includes(currentChar.char)) {
+                learnedChars.push(currentChar.char);
+                localStorage.setItem('learnedChars', JSON.stringify(learnedChars));
+
+                // 加星星
+                stars += 1;
+                localStorage.setItem('stars', stars);
+                updateStars();
+
+                // 显示恭喜
+                showCongrats();
+
+                renderCards();
+                updateProgress();
+            }
+            document.getElementById('modal').classList.remove('show');
+        }
+
+        // 显示恭喜
+        function showCongrats() {
+            const congrats = document.getElementById('congrats');
+            congrats.style.display = 'block';
+            setTimeout(() => {
+                congrats.style.display = 'none';
+            }, 1500);
+        }
+
+        // 更新进度
+        function updateProgress() {
+            const total = Object.values(categories).flat().length;
+            const learned = learnedChars.length;
+            const percent = (learned / total) * 100;
+
+            document.getElementById('learned-count').textContent = learned;
+            document.getElementById('total-count').textContent = total;
+            document.getElementById('progress-fill').style.width = percent + '%';
+        }
+
+        // 更新星星
+        function updateStars() {
+            document.getElementById('star-count').textContent = stars;
+        }
+
+        // 语音朗读
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.8;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>

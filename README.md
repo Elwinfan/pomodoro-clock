@@ -1,6 +1,6 @@
 # 实用工具集合
 
-这里包含两个简单实用的小工具。
+这里包含三个简单实用的小工具。
 
 ## 🍅 番茄时钟
 
@@ -48,6 +48,29 @@ python pomodoro_timer.py
 ### 在线使用
 
 访问：https://elwinfan.github.io/pomodoro-clock/baby-tracker.html
+
+---
+
+## 🌟 快乐识字
+
+四岁宝宝学汉字的互动网页，有趣的识字学习工具。
+
+### 功能
+
+- 🔤 **五大分类** - 数字、颜色、动物/身体、自然、家庭
+- 🎴 **卡片学习** - 点击查看汉字、拼音、组词
+- 🔊 **语音朗读** - 自动朗读拼音
+- ⭐ **奖励机制** - 学会一个字得一颗星星
+- 📊 **进度追踪** - 实时显示学习进度
+- 💾 **自动保存** - 学习记录永久保存
+
+### 使用
+
+直接用浏览器打开 `kids-chinese-learning.html` 即可使用。
+
+### 在线使用
+
+访问：https://elwinfan.github.io/pomodoro-clock/kids-chinese-learning.html
 
 ---
 
