@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>何教练｜晋江减脂 · 你的专属减脂方案</title>
+<style>
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "Microsoft YaHei", "PingFang SC", sans-serif;
+  background: #f5f7fa;
+  color: #1f2937;
+  font-size: 15px;
+  line-height: 1.6;
+  padding-bottom: 40px;
+}
+.wrap { max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,.04); }
+
+/* 顶部封面 */
+.cover {
+  background: linear-gradient(135deg, #1D3557 0%, #264a7a 100%);
+  color: #fff;
+  padding: 32px 22px 26px;
+  text-align: center;
+}
+.cover .avatar {
+  width: 84px; height: 84px;
+  border-radius: 50%;
+  background: #fff;
+  margin: 0 auto 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 38px;
+  border: 3px solid rgba(255,255,255,.3);
+  overflow: hidden;
+}
+.cover .avatar img { width: 100%; height: 100%; object-fit: cover; }
+.cover h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+.cover .sub { font-size: 13px; opacity: .85; }
+.cover .tags { margin-top: 12px; display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+.cover .tag {
+  font-size: 11px; padding: 3px 10px;
+  background: rgba(255,255,255,.18);
+  border-radius: 10px;
+}
+
+/* 钩子区 */
+.hook {
+  padding: 20px 22px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+}
+.hook p { font-size: 14px; color: #6b7280; }
+.hook .hi { font-size: 17px; color: #1f2937; font-weight: 600; margin-bottom: 6px; }
+
+/* 标签栏 */
+.tabs {
+  position: sticky; top: 0; z-index: 10;
+  display: flex;
+  background: #fff;
+  border-bottom: 2px solid #f0f0f0;
+  overflow-x: auto;
+}
+.tab {
+  flex: 1;
+  padding: 14px 4px;
+  text-align: center;
+  font-size: 13px;
+  color: #6b7280;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  transition: all .2s;
+}
+.tab.active { color: #1D3557; border-bottom-color: #1D3557; font-weight: 600; }
+
+/* 内容区 */
+.panel { display: none; padding: 20px 22px; }
+.panel.active { display: block; }
+
+/* 卡片 */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid #f0f0f0;
+}
+.card h3 { font-size: 15px; color: #1D3557; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.card p { font-size: 14px; color: #4b5563; margin-bottom: 8px; }
+.card ul { padding-left: 18px; font-size: 14px; color: #4b5563; }
+.card li { margin-bottom: 6px; }
+
+/* 流程 */
+.steps { display: flex; flex-direction: column; gap: 10px; }
+.step {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px; background: #f9fafb; border-radius: 10px;
+}
+.step .num {
+  width: 28px; height: 28px; flex-shrink: 0;
+  background: #1D3557; color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600;
+}
+.step .txt h4 { font-size: 14px; color: #1f2937; margin-bottom: 2px; }
+.step .txt p { font-size: 12px; color: #6b7280; margin: 0; }
+
+/* 图片网格 */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.grid1 { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 8px; }
+.imgbox {
+  position: relative;
+  aspect-ratio: 3/4;
+  background: #f3f4f6;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  color: #cbd5e1;
+  font-size: 12px;
+  border: 2px dashed #e5e7eb;
+}
+.imgbox img { width: 100%; height: 100%; object-fit: cover; }
+.imgbox .label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(0,0,0,.55); color: #fff;
+  font-size: 11px; padding: 4px 8px; text-align: center;
+}
+
+/* 学员卡 */
+.student {
+  background: #fff; border: 1px solid #f0f0f0;
+  border-radius: 12px; overflow: hidden; margin-bottom: 12px;
+}
+.student .ba { display: flex; }
+.student .ba .b, .student .ba .a {
+  flex: 1; position: relative; aspect-ratio: 1/1;
+  background: #f3f4f6;
+  display: flex; align-items: center; justify-content: center;
+  color: #cbd5e1; font-size: 11px;
+  border: 2px dashed #e5e7eb;
+}
+.student .ba img { width: 100%; height: 100%; object-fit: cover; }
+.student .ba .tag-b, .student .ba .tag-a {
+  position: absolute; top: 6px; left: 6px;
+  font-size: 10px; padding: 2px 6px; border-radius: 4px;
+  color: #fff;
+}
+.student .ba .tag-b { background: #9ca3af; }
+.student .ba .tag-a { background: #2A9D8F; }
+.student .info { padding: 10px 12px; }
+.student .info h4 { font-size: 13px; color: #1f2937; margin-bottom: 2px; }
+.student .info p { font-size: 12px; color: #6b7280; margin: 0; }
+.student .info .data { color: #2A9D8F; font-weight: 600; }
+
+/* 视频 */
+.video-box {
+  aspect-ratio: 9/16; max-width: 100%;
+  background: #1f2937; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: #9ca3af; font-size: 12px;
+  margin-bottom: 8px;
+}
+.video-box video { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+
+/* 答疑 */
+.faq { border-top: 1px solid #f0f0f0; padding-top: 12px; }
+.faq-item { padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+.faq-item:last-child { border-bottom: none; }
+.faq-q { font-size: 14px; color: #1f2937; font-weight: 600; margin-bottom: 4px; }
+.faq-q::before { content: "Q  "; color: #1D3557; }
+.faq-a { font-size: 13px; color: #6b7280; padding-left: 18px; }
+
+/* CTA */
+.cta {
+  margin: 20px 22px;
+  padding: 18px;
+  background: linear-gradient(135deg, #1D3557, #264a7a);
+  border-radius: 14px;
+  text-align: center;
+  color: #fff;
+}
+.cta h3 { font-size: 16px; margin-bottom: 6px; }
+.cta p { font-size: 13px; opacity: .9; margin-bottom: 14px; }
+.cta-btn {
+  display: inline-block;
+  padding: 12px 28px;
+  background: #fff;
+  color: #1D3557;
+  border-radius: 24px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* 提示框 */
+.tip {
+  background: #fff7ed;
+  border-left: 3px solid #fb923c;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #9a3412;
+  margin: 12px 0;
+}
+.tip b { color: #c2410c; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 顶部封面 -->
+  <div class="cover">
+    <div class="avatar">🏋️</div>
+    <h1>何教练｜晋江减脂</h1>
+    <div class="sub">10年健身教练 · 专注上班族/宝妈/零基础减脂塑形</div>
+    <div class="tags">
+      <span class="tag">📍晋江阳光天地3楼</span>
+      <span class="tag">🏅国职教练证</span>
+      <span class="tag">🚁蓝天救援队</span>
+    </div>
+  </div>
+
+  <!-- 钩子 -->
+  <div class="hook">
+    <div class="hi">Hi，很高兴你愿意给自己一个改变的机会 👋</div>
+    <p>我是何教练，给你准备了一份专属说明。30秒看完，你就知道该怎么开始。下面是我的资质、学员真实变化和课堂实拍，<b>用证据说话</b>。</p>
+  </div>
+
+  <!-- 标签栏 -->
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-tab="about">关于我</div>
+    <div class="tab" data-tab="cert">我的资质</div>
+    <div class="tab" data-tab="students">学员变化</div>
+    <div class="tab" data-tab="class">课堂实拍</div>
+  </div>
+
+  <!-- 标签1：关于我 -->
+  <div class="panel active" id="panel-about">
+    <div class="card">
+      <h3>👋 我是谁</h3>
+      <p>我是<b>何非凡</b>，晋江本地人。</p>
+      <p>2016年出去做健身教练，带过上百个人减脂，在外地开过两家工作室。蓝天救援队的活我也在干，家里还有两个娃。</p>
+      <p>带人减脂这么多年，弯路我见太多了——节食饿到反弹的、乱吃药的、疯狂有氧把自己练废的……折腾半天，又累又没瘦下来。</p>
+      <p>所以这趟回来，就想干件实在事：<b>把10年的本事，用在自己人身上。</b></p>
+    </div>
+
+    <div class="card">
+      <h3>🎯 我能帮你什么</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <div class="txt">
+            <h4>体验课（1节）</h4>
+            <p>体测+体态评估+一节团课，看你适不适合，先试再报</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <div class="txt">
+            <h4>28天减脂营</h4>
+            <p>饮食+训练+全程督导，不饿肚子，科学减脂不反弹</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <div class="txt">
+            <h4>持续进阶</h4>
+            <p>巩固习惯，把减脂变成生活方式</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>💡 我的带课理念</h3>
+      <ul>
+        <li><b>不饿肚子</b>：减脂是会吃，不是不吃</li>
+        <li><b>不拼命练</b>：找对方法比练到瘫重要</li>
+        <li><b>不卖焦虑</b>：用数据和事实说话，不靠吓唬人</li>
+        <li><b>本地化</b>：懂晋江人的饮食习惯和作息</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>❓ 常见问题</h3>
+      <div class="faq">
+        <div class="faq-item">
+          <div class="faq-q">零基础能跟上吗？</div>
+          <div class="faq-a">能。第一周不让你上强度，先学动作、找发力感，零基础完全友好。</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">时间怎么安排？</div>
+          <div class="faq-a">日间+晚间都有班次，上班族、宝妈都能找到合适时间。</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">大体重/膝盖不好能练吗？</div>
+          <div class="faq-a">能。我会根据你的情况调整动作，用低冲击训练保护关节。</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">价格多少？</div>
+          <div class="faq-a">建议先来体验课感受下，合适再报28天营。体验课性价比很高，不合适不勉强。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 标签2：我的资质 -->
+  <div class="panel" id="panel-cert">
+    <div class="card">
+      <h3>🏅 资质证书</h3>
+      <p>下面是我的专业资质，<b>不是野路子</b>：</p>
+      <div class="grid2">
+        <!-- 替换：把 src="占位" 改成你的证书照片路径，如 src="证书1.jpg" -->
+        <div class="imgbox"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23f3f4f6' width='100' height='100'/%3E%3Ctext x='50' y='52' font-size='8' fill='%23cbd5e1' text-anchor='middle'%3E国职教练证%3C/text%3E%3C/svg%3E" alt="国职教练证"><div class="label">国职健身教练证</div></div>
+        <div class="imgbox"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23f3f4f6' width='100' height='100'/%3E%3Ctext x='50' y='52' font-size='8' fill='%23cbd5e1' text-anchor='middle'%3E蓝天救援队%3C/text%3E%3C/svg%3E" alt="蓝天救援队"><div class="label">蓝天救援队员</div></div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <b>👉 替换方法：</b>用记事本打开这个html文件，搜索"国职教练证"，把那张占位图换成你的证书照片。或者把照片放在同一个文件夹，命名"证书1.jpg""证书2.jpg"，然后改 src 即可。
+    </div>
+
+    <div class="card">
+      <h3>📊 经历数据</h3>
+      <ul>
+        <li><b>10年</b> 健身教练实战经验</li>
+        <li><b>2家</b> 健身工作室经营经验（外地）</li>
+        <li><b>上百位</b> 减脂学员带教经历</li>
+        <li><b>9000+</b> 节私教课实战教学</li>
+        <li><b>晋江本地人</b>，熟悉本地饮食与作息</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 标签3：学员变化 -->
+  <div class="panel" id="panel-students">
+    <div class="card">
+      <h3>💪 真实学员变化</h3>
+      <p>不P图、不滤镜，真实数据。下面是部分学员的before/after对比。</p>
+    </div>
+
+    <!-- 学员1 -->
+    <div class="student">
+      <div class="ba">
+        <div class="b"><span class="tag-b">Before</span><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23f3f4f6' width='100' height='100'/%3E%3Ctext x='50' y='52' font-size='7' fill='%23cbd5e1' text-anchor='middle'%3E训练前%3C/text%3E%3C/svg%3E" alt="before"></div>
+        <div class="a"><span class="tag-a">After 28天</span><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23f3f4f6' width='100' height='100'/%3E%3Ctext x='50' y='52' font-size='7' fill='%23cbd5e1' text-anchor='middle'%3E训练后%3C/text%3E%3C/svg%3E" alt="after"></div>
+      </div>
+      <div class="info">
+        <h4>学员A · 上班族</h4>
+        <p><span class="data">28天 -9斤 / 腰围-12cm</span></p>
+      </div>
+    </div>
+
+    <!-- 学员2 -->
+    <div class="student">
+      <div class="ba">
+        <div class="b"><span class="tag-b">Before</span><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23f3f4f6' width='100' height='100'/%3E%3Ctext x='50' y='52' font-size='7' fill='%23cbd5e1' text-anchor='middle'%3E训练前%3C/text%3E%3C/svg%3E" alt="before"></div>
+        <div class="a"><span class="tag-a">After 28天</span><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23f3f4f6' width='100' height='100'/%3E%3Ctext x='50' y='52' font-size='7' fill='%23cbd5e1' text-anchor='middle'%3E训练后%3C/text%3E%3C/svg%3E" alt="after"></div>
+      </div>
+      <div class="info">
+        <h4>学员B · 宝妈</h4>
+        <p><span class="data">28天 -7斤 / 体态明显改善</span></p>
+      </div>
+    </div>
+
+    <!-- 学员3 -->
+    <div class="student">
+      <div class="ba">
+        <div class="b"><span class="tag-b">Before</span><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23f3f4f6' width='100' height='100'/%3E%3Ctext x='50' y='52' font-size='7' fill='%23cbd5e1' text-anchor='middle'%3E训练前%3C/text%3E%3C/svg%3E" alt="before"></div>
+        <div class="a"><span class="tag-a">After 28天</span><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23f3f4f6' width='100' height='100'/%3E%3Ctext x='50' y='52' font-size='7' fill='%23cbd5e1' text-anchor='middle'%3E训练后%3C/text%3E%3C/svg%3E" alt="after"></div>
+      </div>
+      <div class="info">
+        <h4>学员C · 久坐族</h4>
+        <p><span class="data">28天 -11斤 / 腰围-8cm</span></p>
+      </div>
+    </div>
+
+    <div class="tip">
+      <b>👉 替换方法：</b>这些是占位图。你有以前的对比照，可以放在同一文件夹，命名如"学员1前.jpg""学员1后.jpg"，然后用记事本打开html搜索"训练前"，把占位图换成你的照片即可。
+    </div>
+  </div>
+
+  <!-- 标签4：课堂实拍 -->
+  <div class="panel" id="panel-class">
+    <div class="card">
+      <h3>📸 课堂实拍</h3>
+      <p>真实的训练场景，看看我们平时怎么练。</p>
+    </div>
+
+    <div class="card">
+      <h3>🎬 训练视频</h3>
+      <div class="video-box">
+        📹 视频占位<br>
+        <small style="font-size:11px">放上课视频片段</small>
+      </div>
+      <p style="font-size:12px;color:#6b7280;">替换方法：把视频命名"class1.mp4"放同文件夹，把上面的video-box换成 &lt;video controls src="class1.mp4"&gt;&lt;/video&gt;</p>
+    </div>
+
+    <div class="card">
+      <h3>📷 训练照片</h3>
+      <div class="grid2">
+        <div class="imgbox"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23f3f4f6' width='100' height='100'/%3E%3Ctext x='50' y='52' font-size='8' fill='%23cbd5e1' text-anchor='middle'%3E训练照1%3C/text%3E%3C/svg%3E" alt="训练照"></div>
+        <div class="imgbox"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23f3f4f6' width='100' height='100'/%3E%3Ctext x='50' y='52' font-size='8' fill='%23cbd5e1' text-anchor='middle'%3E训练照2%3C/text%3E%3C/svg%3E" alt="训练照"></div>
+        <div class="imgbox"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23f3f4f6' width='100' height='100'/%3E%3Ctext x='50' y='52' font-size='8' fill='%23cbd5e1' text-anchor='middle'%3E训练照3%3C/text%3E%3C/svg%3E" alt="训练照"></div>
+        <div class="imgbox"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23f3f4f6' width='100' height='100'/%3E%3Ctext x='50' y='52' font-size='8' fill='%23cbd5e1' text-anchor='middle'%3E训练照4%3C/text%3E%3C/svg%3E" alt="训练照"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🏠 训练场地</h3>
+      <div class="grid1">
+        <div class="imgbox" style="aspect-ratio:16/9;"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Crect fill='%23f3f4f6' width='100' height='60'/%3E%3Ctext x='50' y='32' font-size='7' fill='%23cbd5e1' text-anchor='middle'%3E场地实拍%3C/text%3E%3C/svg%3E" alt="场地"><div class="label">📍 晋江阳光天地3楼</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <h3>下一步</h3>
+    <p>回微信告诉我你想约哪天体验，我帮你留名额。<br>体验完再决定要不要报，完全没压力。</p>
+    <a href="#" class="cta-btn" onclick="alert('请回到微信，发消息给何教练预约体验课');return false;">📩 微信预约体验课</a>
+  </div>
+
+</div>
+
+<script>
+// 标签切换
+document.getElementById('tabs').addEventListener('click', function(e) {
+  var tab = e.target.closest('.tab');
+  if (!tab) return;
+  var target = tab.dataset.tab;
+  // 切换tab
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  // 切换panel
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + target).classList.add('active');
+  // 滚动到顶部
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>
