@@ -1,3 +1,4 @@
+# ===== Python 产物 =====
 __pycache__/
 *.pyc
 *.pyo
@@ -8,7 +9,32 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+
+# ===== 系统 / 编辑器 =====
 .DS_Store
 *.swp
 *.swo
 *~
+
+# ============================================================
+# 白名单模式：默认忽略整个 home 目录，仅放行指定的小工具文件
+# 防止误把 .ssh / AppData / NTUSER.DAT 等敏感文件 git add . 上去
+# 要加新文件进库，在下面相应位置加一行 !放行
+# ============================================================
+/*
+
+# 根目录的仓库管理与工具文件
+!.gitignore
+!README.md
+!*.html
+!*.py
+
+# Desktop 下只放行 HTML 工具
+!Desktop/
+Desktop/*
+!Desktop/*.html
+
+# MyApp 目前只跟踪配置文件（整个 RN 项目太大，需要全跟再说）
+!MyApp/
+MyApp/*
+!MyApp/eas.json
