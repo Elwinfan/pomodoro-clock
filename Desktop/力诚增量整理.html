@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#4BBBF8">
+    <title>门店整理</title>
+
+    <!-- JSZip：门店打包下载用 -->
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script>window.JSZip || document.write('<script src="https://cdn.bootcdn.net/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>')</script>
+    <!-- FileSaver：门店打包下载用 -->
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script>window.saveAs || document.write('<script src="https://cdn.bootcdn.net/ajax/libs/file-saver/2.0.5/FileSaver.min.js"><\/script>')</script>
+
+    <!-- 内联PWA manifest -->
+    <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%E9%97%A8%E5%BA%97%E6%95%B4%E7%90%86%22%2C%22short_name%22%3A%22%E9%97%A8%E5%BA%97%E6%95%B4%E7%90%86%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23F9FAFB%22%2C%22theme_color%22%3A%22%234BBBF8%22%2C%22orientation%22%3A%22portrait%22%7D">
+
+    <style>
+        /* ==================== 全局样式变量 ==================== */
+        :root {
+            --ios-blue: #007AFF;
+            --ios-green: #34C759;
+            --ios-red: #FF3B30;
+            --primary: #4BBBF8;
+            --primary-light: #E3F2FD;
+            --secondary: #00A3FF;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-400: #9CA3AF;
+            --gray-500: #6B7280;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #eef2f7;
+            color: #1e293b;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        /* ==================== 门店整理样式 ==================== */
+
+        /* ==================== 门店整理样式 ==================== */
+        .topbar { position: sticky; top: 0; z-index: 30; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.08); padding: 10px 12px; }
+        .topbar .row2 { display: flex; gap: 8px; align-items: flex-end; }
+        .topbar .row2 + .row2 { margin-top: 8px; }
+        .topbar .f { flex: 1; min-width: 0; }
+        .topbar .row2 button { flex: 1; }
+        .topbar .f label { display: block; font-size: 11px; color: #64748b; margin-bottom: 3px; font-weight: 600; }
+        .topbar .f input { width: 100%; padding: 8px 9px; border: 2px solid #e2e8f0; border-radius: 7px; font-size: 14px; min-height: 38px; }
+        .topbar .f input:focus { outline: none; border-color: #2563eb; }
+        .topbar .reset { font-size: 12px; color: #dc2626; background: #fef2f2; border: none; padding: 9px 11px; border-radius: 7px; font-weight: 600; cursor: pointer; height: 38px; white-space: nowrap; }
+        .topbar .export { padding: 0 12px; background: linear-gradient(135deg, #2563eb, #16a34a); color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap; height: 38px; min-width: 56px; }
+
+        .md-segment { display: flex; gap: 8px; margin-top: 10px; }
+        .md-segment .seg-btn { flex: 1; padding: 10px 8px; border: none; background: #f1f5f9; border-radius: 9px; font-size: 14px; font-weight: 600; color: #64748b; cursor: pointer; }
+        .md-segment .seg-btn.active { background: #2563eb; color: #fff; box-shadow: 0 3px 10px rgba(37,99,235,.25); }
+        .md-segment .seg-btn.active.gt { background: #16a34a; box-shadow: 0 3px 10px rgba(22,163,74,.25); }
+        .md-segment .seg-btn small { display: block; font-size: 11px; font-weight: 500; opacity: .85; margin-top: 2px; }
+
+        .panels { max-width: 760px; margin: 0 auto; padding: 12px; }
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .panel .ptitle { font-size: 14px; color: #64748b; margin-bottom: 10px; }
+
+        .list { counter-reset: it; }
+        .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 11px; padding: 10px; margin-bottom: 9px; counter-increment: it; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+        .card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .num { width: 26px; height: 26px; border-radius: 50%; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex: none; }
+        .num::before { content: counter(it); }
+        .block-gt .num { background: #16a34a; }
+        .block-dp .num { background: #7c3aed; }
+        .md-segment .seg-btn.active.dp, .deliver-seg .dseg-btn.active.dp { background: #7c3aed; box-shadow: 0 3px 10px rgba(124,58,237,.25); }
+        .block-dp .dnum { background: #7c3aed; }
+        .nm { flex: 1; padding: 8px 10px; border: 2px solid #e2e8f0; border-radius: 7px; font-size: 15px; min-height: 38px; min-width: 0; }
+        .nm:focus { outline: none; border-color: #2563eb; }
+        .del { padding: 7px 10px; background: #fef2f2; color: #dc2626; border: none; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; }
+
+        .batch-all { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 13px; border: none; background: linear-gradient(135deg, #2563eb, #16a34a); color: #fff; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; margin-bottom: 12px; box-shadow: 0 3px 10px rgba(37,99,235,.2); }
+        .batch-all:active { opacity: .85; }
+        .batch-all input { display: none; }
+
+        .imgs { display: flex; gap: 8px; }
+        .slot { flex: 1; position: relative; height: 118px; border: 2px dashed #cbd5e1; border-radius: 8px; overflow: hidden; background: #f8fafc; min-width: 0; }
+        .slot.has { border-style: solid; border-color: #16a34a; background: #fff; }
+        .tap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .tap input { display: none; }
+        .ph { color: #94a3b8; font-size: 12px; font-weight: 600; }
+        .pv { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+        .slot.has .pv { display: block; }
+        .slot.has .ph { display: none; }
+        .tag { position: absolute; left: 0; bottom: 0; right: 0; background: rgba(0,0,0,.55); color: #fff; font-size: 10px; text-align: center; padding: 2px; display: none; z-index: 2; }
+        .slot.has .tag { display: block; }
+        .x { display: none; position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%; background: rgba(0,0,0,.6); color: #fff; border: none; cursor: pointer; font-size: 11px; align-items: center; justify-content: center; z-index: 3; }
+        .slot.has .x { display: flex; }
+        .add { width: 100%; padding: 12px; border: 2px dashed #94a3b8; background: #fff; color: #475569; border-radius: 9px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .add:active { background: #f1f5f9; }
+
+        /* ==================== toast ==================== */
+        .toast { position: fixed; left: 50%; top: 60px; transform: translateX(-50%); background: rgba(15,23,42,.92); color: #fff; padding: 11px 18px; border-radius: 9px; opacity: 0; pointer-events: none; transition: .25s; z-index: 100000; max-width: 88vw; white-space: pre-line; font-size: 13px; text-align: center; }
+        .toast.show { opacity: 1; }
+        .toast.err { background: rgba(220,38,38,.95); }
+        .toast.ok { background: rgba(22,163,74,.95); }
+
+        /* ==================== 使用建议弹窗 ==================== */
+        .guide-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 10001; padding: 20px; }
+        .guide-overlay.open { display: flex; }
+        .guide-card { background: #fff; border-radius: 16px; padding: 24px 20px; max-width: 380px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.3); max-height: 85vh; overflow-y: auto; }
+        .guide-title { font-size: 20px; font-weight: 700; color: #1f2937; margin-bottom: 14px; text-align: center; }
+        .guide-rank { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+        .guide-rank .rank-item { display: flex; align-items: center; gap: 10px; padding: 11px 13px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #334155; }
+        .guide-rank .rank-item.first { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-color: #fcd34d; }
+        .guide-rank .medal { font-size: 20px; flex: none; }
+        .guide-rank .rank-text { flex: 1; }
+        .guide-rank .rank-text b { color: #0f172a; }
+        .guide-rank .rank-text small { display: block; font-size: 12px; color: #64748b; margin-top: 1px; }
+        .guide-warn { font-size: 13px; color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; padding: 10px 12px; border-radius: 9px; margin-bottom: 10px; line-height: 1.6; }
+        .guide-warn b { color: #dc2626; }
+        .guide-tip { font-size: 13px; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 10px 12px; border-radius: 9px; margin-bottom: 14px; line-height: 1.6; }
+        .guide-tip b { color: #2563eb; }
+        .guide-check { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; margin-bottom: 14px; }
+        .guide-btn { width: 100%; padding: 13px; border: none; border-radius: 12px; background: linear-gradient(135deg, #4BBBF8 0%, #2563eb 100%); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; }
+        .guide-btn:active { transform: scale(.98); }
+    </style>
+</head>
+<body>
+    <!-- 使用建议弹窗 -->
+    <div id="guideOverlay" class="guide-overlay">
+        <div class="guide-card">
+            <h3 class="guide-title">👋 使用建议</h3>
+            <div class="guide-rank">
+                <div class="rank-item first">
+                    <span class="medal">🥇</span>
+                    <span class="rank-text"><b>UC 浏览器</b><small>安卓首选 · 全功能支持</small></span>
+                </div>
+                <div class="rank-item">
+                    <span class="medal">🥈</span>
+                    <span class="rank-text"><b>Safari / 自带浏览器</b><small>苹果用Safari · 安卓用自带</small></span>
+                </div>
+                <div class="rank-item">
+                    <span class="medal">🥉</span>
+                    <span class="rank-text"><b>夸克 浏览器</b><small>⚠️ 不支持批量多选上传</small></span>
+                </div>
+            </div>
+            <div class="guide-warn">⚠️ <b>别用微信直接打开</b>，否则上传/下载照片会失败。点击右上角 <b>···</b> 选「在浏览器打开」。</div>
+            <div class="guide-tip">💡 <b>小贴士</b>：部分浏览器（如夸克）不支持一次选多张照片，只能一张一张传，属正常现象。要批量上传请用 UC 或系统自带浏览器。</div>
+            <label class="guide-check"><input type="checkbox" id="guideDontShow"> 下次不再提示</label>
+            <button class="guide-btn" id="guideStartBtn" type="button">我知道了</button>
+        </div>
+    </div>
+
+    <div id="mainContent" class="mobile-container-wrap">
+<!-- ============ 门店整理面板 ============ -->
+        <section id="store-panel" class="top-panel active">
+            <div class="topbar">
+                <div class="row2">
+                    <div class="f"><label>业务员名字</label><input id="nameInput" type="text" placeholder="张三" maxlength="40"></div>
+                    <div class="f"><label>日期</label><input id="dateInput" type="date"></div>
+                </div>
+                <div class="row2">
+                    <button class="reset" id="mdResetBtn" type="button">🗑️ 重置</button>
+                    <button class="export" id="exportBtn" type="button">📦 打包</button>
+                </div>
+                <div class="md-segment">
+                    <button class="seg-btn active" id="tab-shouyin" type="button">🏬 收银台<small id="cnt-shouyin">1家</small></button>
+                    <button class="seg-btn gt" id="tab-guatiao" type="button">📎 挂条<small id="cnt-guatiao">1家</small></button>
+                    <button class="seg-btn dp" id="tab-dadanpin" type="button">🛒 大单品<small id="cnt-dadanpin">1家</small></button>
+                </div>
+            </div>
+
+            <div class="panels">
+                <section id="shouyin-panel" class="panel active">
+                    <div class="ptitle">🏬 收银台陈列 — 每家：门店名 + 门头照 + 收银台照</div>
+                    <label class="batch-all"><input type="file" accept="image/*" multiple>📤 批量上传（门头-收银台）</label>
+                    <div class="list" id="shouyin-list" data-tab="shouyin"></div>
+                    <button class="add" id="add-shouyin" type="button">＋ 添加一家收银台门店</button>
+                </section>
+                <section id="guatiao-panel" class="panel block-gt">
+                    <div class="ptitle">📎 挂条陈列 — 每家：门店名 + 门头照 + 挂条照</div>
+                    <label class="batch-all"><input type="file" accept="image/*" multiple>📤 批量上传（门头-挂条）</label>
+                    <div class="list" id="guatiao-list" data-tab="guatiao"></div>
+                    <button class="add" id="add-guatiao" type="button">＋ 添加一家挂条门店</button>
+                </section>
+                <section id="dadanpin-panel" class="panel block-dp">
+                    <div class="ptitle">🛒 大单品陈列 — 每家：门店名 + 门头照 + 大单品照</div>
+                    <label class="batch-all"><input type="file" accept="image/*" multiple>📤 批量上传（门头-大单品）</label>
+                    <div class="list" id="dadanpin-list" data-tab="dadanpin"></div>
+                    <button class="add" id="add-dadanpin" type="button">＋ 添加一家大单品门店</button>
+                </section>
+            </div>
+        </section>
+        <div class="toast" id="toast"></div>
+    </div>
+
+    <script>
+    /* ========================================================
+     * 使用建议弹窗逻辑
+     * ====================================================== */
+    (function() {
+        const KEY = 'lzul_guide_hide';
+        const overlay = document.getElementById('guideOverlay');
+        function openGuide() {
+            if (localStorage.getItem(KEY) === 'true') return;
+            overlay.classList.add('open');
+        }
+        function closeGuide() {
+            if (document.getElementById('guideDontShow').checked) localStorage.setItem(KEY, 'true');
+            overlay.classList.remove('open');
+        }
+        document.getElementById('guideStartBtn').addEventListener('click', closeGuide);
+        overlay.addEventListener('click', e => { if (e.target === overlay) closeGuide(); });
+        window.addEventListener('load', openGuide);
+    })();
+
+    /* ========================================================
+     * 门店整理逻辑
+     * ====================================================== */
+    const SECOND_LABEL = { shouyin:'收银台', guatiao:'挂条', dadanpin:'大单品' };
+    let mdUid = 1;
+    const mdData = { shouyin:[], guatiao:[], dadanpin:[] };
+    let curTab = 'shouyin';
+
+    // 用一个独立的 $，避免与未来扩展冲突
+    const md$ = s => document.querySelector(s);
+    const nameInput = md$('#nameInput'), dateInput = md$('#dateInput');
+    const toastEl = md$('#toast'), exportBtn = md$('#exportBtn');
+
+    function setToday(){ const d=new Date(); dateInput.value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+    function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+    function ext(name){ const m=((name||'').match(/\.([a-zA-Z0-9]+)$/)||[,'jpg'])[1].toLowerCase(); return m==='jpeg'?'jpg':m; }
+    function clean(s){ return (s||'').replace(/[\\/:*?"<>|\s]+/g,'').trim(); }
+    function toast(msg,t){ toastEl.textContent=msg; toastEl.className='toast show'+(t?' '+t:''); clearTimeout(toast._t); toast._t=setTimeout(()=>toastEl.classList.remove('show'),t==='err'?5000:2400); }
+    function readAsDataURL(blob){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(blob); }); }
+    const thumbOf = p => p ? (p.thumb||p.data||'') : '';
+    const fullOf  = p => p ? (p.full||p.data||'') : '';
+
+    async function scaleTo(bmp, max, q){
+        const sc=Math.min(1, max/Math.max(bmp.width,bmp.height));
+        const w=Math.round(bmp.width*sc), h=Math.round(bmp.height*sc);
+        const c=document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(bmp,0,0,w,h);
+        const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',q));
+        if(!blob) return null;
+        return await readAsDataURL(blob);
+    }
+    async function fileToPhoto(file){
+        try{
+            const bmp=await createImageBitmap(file);
+            const full=await scaleTo(bmp,1280,0.8);
+            const thumb=await scaleTo(bmp,400,0.7);
+            if(bmp.close) bmp.close();
+            if(full) return { thumb:thumb||full, full, name:(file.name||'photo').replace(/\.[^.]+$/,'')+'.jpg' };
+        }catch(e){}
+        const data=await readAsDataURL(file);
+        return { thumb:data, full:data, name:file.name||'photo.jpg' };
+    }
+
+    function cardHTML(tab, s){
+        const lab = SECOND_LABEL[tab];
+        return `<div class="card store-card" data-id="${s.id}">
+            <div class="card-head">
+                <span class="num"></span>
+                <input class="nm" type="text" maxlength="40" placeholder="输入门店名" value="${esc(s.store)}">
+                <button class="del" type="button">删除</button>
+            </div>
+            <div class="imgs">
+                <div class="slot ${s.door?'has':''}" data-type="door">
+                    <label class="tap"><input type="file" accept="image/*"><span class="ph">门头</span><img class="pv" src="${thumbOf(s.door)}" alt=""></label>
+                    <span class="tag">门头</span><button class="x" type="button">✕</button>
+                </div>
+                <div class="slot ${s.second?'has':''}" data-type="second">
+                    <label class="tap"><input type="file" accept="image/*"><span class="ph">${lab}</span><img class="pv" src="${thumbOf(s.second)}" alt=""></label>
+                    <span class="tag">${lab}</span><button class="x" type="button">✕</button>
+                </div>
+            </div>
+        </div>`;
+    }
+    function renderList(tab){
+        document.getElementById(tab+'-list').innerHTML = mdData[tab].map(s=>cardHTML(tab,s)).join('');
+        updateCount(tab);
+    }
+    function updateCount(tab){ md$('#cnt-'+tab).textContent=mdData[tab].length+'家'; }
+    function appendCard(tab, s){
+        const list=document.getElementById(tab+'-list');
+        const tmp=document.createElement('div'); tmp.innerHTML=cardHTML(tab,s);
+        const card=tmp.firstElementChild; list.appendChild(card); updateCount(tab); return card;
+    }
+    function updateSlot(card, type, photo){
+        const slot=card.querySelector(`.slot[data-type="${type}"]`); if(!slot) return;
+        const img=slot.querySelector('.pv');
+        if(photo){ img.src=thumbOf(photo); slot.classList.add('has'); }
+        else { img.removeAttribute('src'); slot.classList.remove('has'); }
+    }
+    function findStore(tab,id){ return mdData[tab].find(x=>x.id===id); }
+
+    function addStore(tab){
+        const s={ id:mdUid++, store:'', door:null, second:null };
+        mdData[tab].push(s);
+        const card=appendCard(tab,s);
+        scheduleSave();
+        card.querySelector('.nm').focus();
+        card.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+
+    // segment 切换（原底部 tabbar，三分类）
+    md$('#tab-shouyin').addEventListener('click', ()=> switchTab('shouyin') );
+    md$('#tab-guatiao').addEventListener('click', ()=> switchTab('guatiao') );
+    md$('#tab-dadanpin').addEventListener('click', ()=> switchTab('dadanpin') );
+    function switchTab(tab){
+        curTab=tab;
+        md$('#tab-shouyin').classList.toggle('active', tab==='shouyin');
+        md$('#tab-guatiao').classList.toggle('active', tab==='guatiao');
+        md$('#tab-guatiao').classList.toggle('gt', tab==='guatiao');
+        md$('#tab-dadanpin').classList.toggle('active', tab==='dadanpin');
+        md$('#tab-dadanpin').classList.toggle('dp', tab==='dadanpin');
+        document.querySelectorAll('#store-panel .panel').forEach(p=>p.classList.remove('active','block-gt','block-dp'));
+        const p=document.getElementById(tab+'-panel'); p.classList.add('active');
+        if(tab==='guatiao') p.classList.add('block-gt');
+        if(tab==='dadanpin') p.classList.add('block-dp');
+        renderList(tab);
+        window.scrollTo({top:0, behavior:'smooth'});
+    }
+    md$('#add-shouyin').addEventListener('click', ()=> addStore('shouyin') );
+    md$('#add-guatiao').addEventListener('click', ()=> addStore('guatiao') );
+    md$('#add-dadanpin').addEventListener('click', ()=> addStore('dadanpin') );
+
+    ['shouyin','guatiao','dadanpin'].forEach(tab=>{
+        const list=document.getElementById(tab+'-list');
+        list.addEventListener('click', e=>{
+            const card=e.target.closest('.store-card'); if(!card) return;
+            const id=+card.dataset.id; const s=findStore(tab,id);
+            const x=e.target.closest('.x');
+            if(x){ const type=x.closest('.slot').dataset.type; if(s) s[type]=null; updateSlot(card,type,null); scheduleSave(); return; }
+            const del=e.target.closest('.del');
+            if(del){ mdData[tab]=mdData[tab].filter(z=>z.id!==id); card.remove(); updateCount(tab); scheduleSave(); return; }
+        });
+        list.addEventListener('input', e=>{
+            const nm=e.target.closest('.nm'); if(!nm) return;
+            const s=findStore(tab, +nm.closest('.store-card').dataset.id);
+            if(s){ s.store=nm.value; scheduleSave(); }
+        });
+        list.addEventListener('change', async e=>{
+            const input=e.target; if(input.type!=='file') return;
+            const card=input.closest('.store-card'); const s=findStore(tab, +card.dataset.id);
+            if(input.multiple){
+                const files=Array.from(input.files).filter(f=>f.type.startsWith('image/')).slice(0,2);
+                input.value='';
+                if(!s) return;
+                if(!files.length){ toast('没选中图片','err'); return; }
+                toast('处理中…');
+                try{
+                    const types=['door','second'];
+                    const photos=await Promise.all(files.map(fileToPhoto));
+                    photos.forEach((p,idx)=>{ s[types[idx]]=p; updateSlot(card, types[idx], p); });
+                    scheduleSave();
+                    toast(files.length===2 ? `✅ 门头+${SECOND_LABEL[tab]}已填` : '只选1张，已填门头','ok');
+                }catch(err){ toast('处理失败','err'); }
+                return;
+            }
+            const file=input.files[0]; input.value='';
+            if(!file) return;
+            if(!file.type.startsWith('image/')){ toast('只能选图片','err'); return; }
+            if(!s) return;
+            const type=input.closest('.slot').dataset.type;
+            try{ s[type]=await fileToPhoto(file); updateSlot(card, type, s[type]); scheduleSave(); }
+            catch(err){ toast('处理失败','err'); }
+        });
+    });
+
+    async function batchAssign(tab, files){
+        if(!files.length) return;
+        const list=document.getElementById(tab+'-list');
+        const photos=[];
+        for(let k=0;k<files.length;k++){
+            toast(`处理中 ${k+1}/${files.length} …`);
+            try{ photos.push(await fileToPhoto(files[k])); }catch(e){}
+            if(k % 10 === 9) await new Promise(r=>setTimeout(r, 0));
+        }
+        if(!photos.length){ toast('处理失败','err'); return; }
+        let startIdx=0;
+        for(let i=mdData[tab].length-1;i>=0;i--){ const s=mdData[tab][i];
+            if(s.door||s.second||(s.store&&s.store.trim())){ startIdx=i+1; break; }
+            startIdx=i;
+        }
+        for(let k=0;k<photos.length;k++){
+            const storeIdx=startIdx+Math.floor(k/2);
+            const type=(k%2===0)?'door':'second';
+            let store=mdData[tab][storeIdx];
+            let card;
+            if(!store){ store={id:mdUid++,store:'',door:null,second:null}; mdData[tab].push(store); card=appendCard(tab,store); }
+            else { card=list.children[storeIdx]; }
+            store[type]=photos[k];
+            updateSlot(card,type,photos[k]);
+        }
+        updateCount(tab);
+        scheduleSave();
+        const fams=Math.ceil(photos.length/2); const base=startIdx+1;
+        toast(photos.length%2 ? `✅ 追加${photos.length}张 → 从第${base}家起${fams}家（最后1家只填了门头）` : `✅ 追加${photos.length}张 → 从第${base}家起${fams}家`,'ok');
+    }
+    document.addEventListener('change', async e=>{
+        const inp=e.target.closest('.batch-all input'); if(!inp) return;
+        const pid=inp.closest('.panel').id;
+        const tab=pid==='shouyin-panel'?'shouyin':pid==='guatiao-panel'?'guatiao':'dadanpin';
+        const files=Array.from(inp.files).filter(f=>f.type.startsWith('image/'));
+        inp.value='';
+        if(!files.length){ toast('没选中图片','err'); return; }
+        await batchAssign(tab, files);
+    });
+
+    nameInput.addEventListener('input', scheduleSave);
+
+    md$('#mdResetBtn').addEventListener('click', ()=>{
+        if(!confirm('确定全部清空？收银台/挂条所有门店和照片都删除，不可恢复。')) return;
+        mdData.shouyin=[]; mdData.guatiao=[]; mdData.dadanpin=[]; nameInput.value=''; idbPut(null);
+        document.getElementById('shouyin-list').innerHTML='';
+        document.getElementById('guatiao-list').innerHTML='';
+        document.getElementById('dadanpin-list').innerHTML='';
+        addStore('shouyin'); addStore('guatiao'); addStore('dadanpin');
+        if(curTab!=='shouyin') switchTab('shouyin');
+        toast('已清空','ok');
+    });
+
+    function validate(){
+        const issues=[];
+        ['shouyin','guatiao','dadanpin'].forEach(tab=>{
+            mdData[tab].forEach((s,i)=>{ const lack=[];
+                if(!s.store.trim()) lack.push('门店名'); if(!s.door) lack.push('门头'); if(!s.second) lack.push(SECOND_LABEL[tab]);
+                if(lack.length) issues.push(`【${SECOND_LABEL[tab]}】第${i+1}家 缺：${lack.join('、')}`);
+            });
+        });
+        return issues;
+    }
+    function fmtDate(v){ const [y,m,d]=v.split('-').map(Number); return `${y}年${m}月${d}日`; }
+    function dataUrlToBlob(d){ const [h,b]=d.split(','); const mime=(h.match(/:(.*?);/)||[,'image/jpeg'])[1]; const bin=atob(b); const a=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i); return new Blob([a],{type:mime}); }
+
+    exportBtn.addEventListener('click', async ()=>{
+        const name=nameInput.value.trim();
+        if(!name){ toast('请先填名字','err'); nameInput.focus(); return; }
+        if(!dateInput.value){ toast('请选日期','err'); return; }
+        if(!mdData.shouyin.length && !mdData.guatiao.length && !mdData.dadanpin.length){ toast('请先添加门店','err'); return; }
+        const issues=validate();
+        if(issues.length){ toast('这些门店不完整，补全或删除：\n\n'+issues.join('\n'),'err'); return; }
+        if(typeof JSZip==='undefined'){ toast('压缩库加载失败，刷新重试','err'); return; }
+        const old=exportBtn.textContent; exportBtn.disabled=true;
+        try{
+            const items=[];
+            mdData.shouyin.forEach((s,i)=>{ const seq=i+1, sn=clean(s.store)||('门店'+seq);
+                items.push(['sy',`${seq}${sn}门头`,s.door]); items.push(['sy',`${seq}${sn}收银台`,s.second]); });
+            mdData.guatiao.forEach((s,i)=>{ const seq=i+1, sn=clean(s.store)||('门店'+seq);
+                items.push(['gt',`${seq}${sn}门头`,s.door]); items.push(['gt',`${seq}${sn}挂条`,s.second]); });
+            mdData.dadanpin.forEach((s,i)=>{ const seq=i+1, sn=clean(s.store)||('门店'+seq);
+                items.push(['dp',`${seq}${sn}门头`,s.door]); items.push(['dp',`${seq}${sn}大单品`,s.second]); });
+            const zip=new JSZip();
+            const sy=zip.folder('收银台陈列'), gt=zip.folder('挂条陈列'), dp=zip.folder('大单品陈列');
+            const folderMap={sy:sy,gt:gt,dp:dp};
+            for(let k=0;k<items.length;k++){
+                const [folder,base,photo]=items[k];
+                folderMap[folder].file(`${base}.${ext(photo.name)}`, dataUrlToBlob(fullOf(photo)));
+                exportBtn.textContent=`📦 ${Math.round((k+1)/items.length*100)}%`;
+            }
+            const out=await zip.generateAsync({type:'blob'});
+            const zipName=`${fmtDate(dateInput.value)}+${name}.zip`;
+            if (typeof saveAs==='function'){ saveAs(out, zipName); }
+            else { const a=document.createElement('a'); a.href=URL.createObjectURL(out); a.download=zipName; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),5000); }
+            toast('✅ '+zipName,'ok');
+        }catch(err){ toast('打包失败：'+err.message,'err'); }
+        finally{ exportBtn.disabled=false; exportBtn.textContent=old; }
+    });
+
+    // IndexedDB 持久化
+    let _db;
+    function db(){ return new Promise((res,rej)=>{ if(_db) return res(_db); const r=indexedDB.open('mendianzip3',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>{_db=r.result;res(_db);}; r.onerror=()=>rej(r.error); }); }
+    async function idbPut(v){ try{ const d=await db(); await new Promise((res,rej)=>{const t=d.transaction('kv','readwrite'); t.objectStore('kv').put(v,'cur'); t.oncomplete=res; t.onerror=()=>rej(t.error);}); }catch(e){} }
+    async function idbGet(){ try{ const d=await db(); return await new Promise(res=>{const t=d.transaction('kv','readonly'); const q=t.objectStore('kv').get('cur'); q.onsuccess=()=>res(q.result); q.onerror=()=>res(null);}); }catch(e){ return null; } }
+    function serialize(){ return { name:nameInput.value, shouyin:mdData.shouyin, guatiao:mdData.guatiao, dadanpin:mdData.dadanpin }; }
+    let saveTimer; let saving=false;
+    function scheduleSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(doSave,800); }
+    async function doSave(){ if(saving){ scheduleSave(); return; } saving=true; try{ await idbPut(serialize()); }catch(e){} finally{ saving=false; } }
+
+    // 初始化：同步先出第一家
+    (function initNow(){
+        setToday();
+        mdData.shouyin.push({ id:mdUid++, store:'', door:null, second:null });
+        mdData.guatiao.push({ id:mdUid++, store:'', door:null, second:null });
+        mdData.dadanpin.push({ id:mdUid++, store:'', door:null, second:null });
+        renderList('shouyin'); renderList('guatiao'); renderList('dadanpin');
+    })();
+    (async ()=>{
+        try{
+            const saved=await idbGet();
+            if(saved && ((saved.shouyin&&saved.shouyin.length)||(saved.guatiao&&saved.guatiao.length)||(saved.dadanpin&&saved.dadanpin.length))){
+                mdData.shouyin=saved.shouyin||[]; mdData.guatiao=saved.guatiao||[]; mdData.dadanpin=saved.dadanpin||[]; nameInput.value=saved.name||'';
+                mdUid=Math.max(mdUid, ...mdData.shouyin.map(x=>x.id), ...mdData.guatiao.map(x=>x.id), ...mdData.dadanpin.map(x=>x.id), 0)+1;
+                renderList('shouyin'); renderList('guatiao'); renderList('dadanpin');
+            }
+        }catch(e){}
+    })();
+
+
+    </script>
+</body>
+</html>
